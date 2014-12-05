@@ -4,13 +4,13 @@ import pandas as pd
 from abc import ABCMeta, abstractmethod
 
 
-def single_word(ws):
-    def s_match(w):
-        return w.str.match(r'\A[\w-]+\Z')
-    try:
-        return s_match(ws)
-    except AttributeError:
-        return [s_match(w) for w in ws]
+# def single_word(ws):
+#     def s_match(w):
+#         return w.str.match(r'\A[\w-]+\Z')
+#     try:
+#         return s_match(ws)
+#     except AttributeError:
+#         return [s_match(w) for w in ws]
 
 
 def lreduce(fun, ls, z):

@@ -3,7 +3,6 @@ __author__ = 'Ian Smith, Lucas Hure'
 import numpy as np
 import core
 from abc import ABCMeta, abstractmethod
-import re
 
 
 class CategoryMapper(object):

@@ -1,8 +1,29 @@
-__author__ = 'Ian Smith'
-__author__ = 'Lucas Hure'
+__author__ = 'Ian Smith, Lucas Hure'
 
 import pandas as pd
 from abc import ABCMeta, abstractmethod
+
+
+def single_word(ws):
+    def s_match(w):
+        return w.str.match(r'\A[\w-]+\Z')
+    try:
+        return s_match(ws)
+    except AttributeError:
+        return [s_match(w) for w in ws]
+
+
+def lreduce(fun, ls, z):
+
+    def lreduce_r(fun, ls, acc):
+        if len(ls) > 0:
+            # print ls
+            # print acc
+            return lreduce_r(fun, ls[1:], fun(acc, ls[0]))
+        else:
+            return acc
+
+    return lreduce_r(fun, ls, z)
 
 
 class SentModel(object):
@@ -12,12 +33,12 @@ class SentModel(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def train(self, X, y):
-        raise NotImplementedError("train() method in abstract base class is not implemented.")
+    def fit(self, X, y):
+        raise NotImplementedError
 
     @abstractmethod
     def predict(self, X):
-        raise NotImplementedError("predict() method in abstract base class is not implemented.")
+        raise NotImplementedError
 
 
 class StatsRating(pd.DataFrame):

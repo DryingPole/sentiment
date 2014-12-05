@@ -1,2 +1,3 @@
-__author__ = 'imksmith'
+__author__ = 'Ian Smith, Lucas Hure'
+
 

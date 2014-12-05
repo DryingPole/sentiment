@@ -1,9 +1,9 @@
-__author__ = 'Ian Smith'
-__author__ = 'Lucas Hure'
+__author__ = 'Ian Smith, Lucas Hure'
 
 import numpy as np
 import core
 from abc import ABCMeta, abstractmethod
+import re
 
 
 class CategoryMapper(object):
@@ -15,81 +15,79 @@ class CategoryMapper(object):
 
     @abstractmethod
     def map(self, val):
-        return np.round(val)
+        return int(np.round(val))
 
 
 class DefaultMapper(CategoryMapper):
+    """
+    Maps a floating-point to a category via simple rounding.
+    """
     def __init__(self):
-        super.__init__(self)
+        CategoryMapper.__init__(self)
 
     def map(self, val):
         return np.round(val)
 
 
 class MovieMapper(CategoryMapper):
+    """
+
+    """
     def __init__(self):
-        super.__init__(self)
+        CategoryMapper.__init__(self)
 
     def map(self, val):
-        if 1.7 < val < 2.7:
-            return 2
-        elif val < 8:
-            return 1
-        else:
-            return super.map()
+        raise NotImplementedError
 
 
 class BagOfWordsModel(core.SentModel):
     def __init__(self, mapper=DefaultMapper()):
-        self.model = {}
+        self.model = None
         self.mapper = mapper
+        self._not_found = 0  # a value re-initialized for each invocation of 'predict'
 
     def set_mapper(self, mapper):
         self.mapper = mapper
 
-    def train(self, X, y):
-        self.model = core.build_sentiment_dict(X)
+    def fit(self, X, y):
+        """
 
-    def predict(self, X):
-        raise NotImplementedError
+        :param X:
+        :param y:
+        :return:
+        """
+        # sw = re.compile(r'\A[\w-]+\Z')
+        # self.model = {xs: ys for xs, ys in zip(X, y) if sw.match(xs)}
+        self.model = {xs: ys for xs, ys in zip(X, y)}
+
+    def predict(self, X, default_caty=2, weight_map={0: 5, 1: 3, 2: 1, 3: 3, 4: 5}):
+        self._not_found = 0
+        predictions = []
+        for phrase in X:
+            words = phrase.split()
+            sent_accum = 0.0
+            weight = 0
+            for w in words:
+                if w in self.model:
+                    sent_val = self.model[w]
+                    sent_accum += sent_val
+                    weight += weight_map[sent_val]
+            if weight != 0:
+                caty = self.mapper.map(sent_accum / weight)
+                predictions.append(caty)
+            else:
+                self._not_found += 1
+                predictions.append(default_caty)
+        return predictions
 
 
-'''
-Function
---------
-Rate reviews using Bag of Words model
 
-Returns
--------
-A new DataFrame with a "Sentiment" column containing the predicted sentiments for each phrase
 
-'''
-# def predict(reviews):
-#     df = reviews.copy()
-#     sentiments = []
-#     not_found = []
-#     for p in reviews['Phrase']:
-#         accum = 0
-#         words_in_dic = 0
-#         mean = 0
-#         split = p.split() # split phrase into words
-#         for s in split:
-#             if s in dic:
-#                 words_in_dic += 1
-#                 accum += dic[s]
-#         # check for case where no words were found in our dictionary
-#         if words_in_dic == 0:
-#             mean = random.randint(0, 4) # generate random sentiment from 0 to 4
-#             randoms += 1
-#             not_found.append(p)
-#         else:
-#             mean = round(accum / words_in_dic)
-#
-#         sentiments.append(mean)
-#
-#     # add 'Sentiment' column containing predicted sentiments to new dataframe
-#     df['Sentiment'] = sentiments
-#     # print "randomly rated:", randoms
-#
-#     return df, not_found
-
+        # def predict_phrase_caty(p):
+        #     sent_val, w_val = core.lreduce(lambda acc, x: (acc[0] + predict_word_caty(x), p.split(), 0.0)
+        #
+        #     reduce(lambda acc, x: self.model[word] if word in self.model else default_caty,
+        #            p.split(), 0.0)
+        #
+        # def predict_word_caty(word):
+        #     return self.model[word] if word in self.model else default_caty

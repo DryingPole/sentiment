@@ -32,7 +32,7 @@ class MovieMapper(CategoryMapper):
     """
 
     """
-    def __init__(self, round_up):
+    def __init__(self, round_up=0.1):
         CategoryMapper.__init__(self)
         self.round_up = round_up
 

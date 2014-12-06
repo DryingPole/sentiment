@@ -32,11 +32,12 @@ class MovieMapper(CategoryMapper):
     """
 
     """
-    def __init__(self):
+    def __init__(self, round_up):
         CategoryMapper.__init__(self)
+        self.round_up = round_up
 
     def map(self, val):
-        raise NotImplementedError
+        return np.round(val + self.round_up)
 
 
 class BagOfWordsModel(core.SentModel):
@@ -69,7 +70,7 @@ class BagOfWordsModel(core.SentModel):
             for w in words:
                 if w in self.model:
                     sent_val = self.model[w]
-                    sent_accum += sent_val
+                    sent_accum += sent_val * weight_map[sent_val]
                     weight += weight_map[sent_val]
             if weight != 0:
                 caty = self.mapper.map(sent_accum / weight)
@@ -79,14 +80,3 @@ class BagOfWordsModel(core.SentModel):
                 predictions.append(default_caty)
         return predictions
 
-
-
-
-        # def predict_phrase_caty(p):
-        #     sent_val, w_val = core.lreduce(lambda acc, x: (acc[0] + predict_word_caty(x), p.split(), 0.0)
-        #
-        #     reduce(lambda acc, x: self.model[word] if word in self.model else default_caty,
-        #            p.split(), 0.0)
-        #
-        # def predict_word_caty(word):
-        #     return self.model[word] if word in self.model else default_caty

@@ -12,6 +12,11 @@ from abc import ABCMeta, abstractmethod
 #     except AttributeError:
 #         return [s_match(w) for w in ws]
 
+neg_dict = {"not": 1,
+            "neither": 1,
+            "can't": 1,
+            "isn't": 1,
+            "aint": 1}
 
 def lreduce(fun, ls, z):
 

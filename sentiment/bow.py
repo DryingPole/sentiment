@@ -80,3 +80,5 @@ class BagOfWordsModel(core.SentModel):
                 predictions.append(default_caty)
         return predictions
 
+
+class Ensemble(core.sentMod)

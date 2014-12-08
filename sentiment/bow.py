@@ -21,6 +21,7 @@ class DefaultMapper(CategoryMapper):
     """
     Maps a floating-point to a category via simple rounding.
     """
+
     def __init__(self):
         CategoryMapper.__init__(self)
 
@@ -32,6 +33,7 @@ class MovieMapper(CategoryMapper):
     """
 
     """
+
     def __init__(self, round_up=0.1):
         CategoryMapper.__init__(self)
         self.round_up = round_up
@@ -81,4 +83,38 @@ class BagOfWordsModel(core.SentModel):
         return predictions
 
 
-class Ensemble(core.sentMod)
+class Ensemble(core.SentModel):
+    def __init__(self, models):
+        self.models = models[:]
+        self.fitted_models = None
+        # self.res_disc_fun = self._resolve_discord
+
+    def _resolve_discord(self, m1prob, m2prob, m1p, m2p):
+        # scores = np.ndarray(dtype=int,shape=len())
+        return m1p if m1prob[m1p] + m2prob[m1p] > m1prob[m2p] + m2prob[m2p] else m2p
+
+    def fit(self, X, y):
+        self.fitted_models = [m.fit(X, y) for m in self.models]
+
+    def predict(self, X):
+        preds = [m.predict(X) for m in self.fitted_models]
+        hy_pred = [] # A combined array of the first two models' predictions
+
+        m1 = self.fitted_models[0]
+        m2 = self.fitted_models[1]
+
+        discords = filter(lambda x: x is not None,
+                          map(lambda a, b, i: (a, b, i) if a != b else None,
+                              preds[0], preds[1], range(len(preds[0]))))
+
+        m1prob = m1.predict_proba(X)[:]
+        m2prob = m2.predict_proba(X)[:]
+
+        # For disagreeing predictions, take the predicted category with the highes
+        # associated confidence.
+        for m1p, m2p, ix in discords:
+            hy_pred[ix] = self._resolve_discord(m1prob[ix], m2prob[ix], m1p, m2p)
+
+        return hy_pred
+
+

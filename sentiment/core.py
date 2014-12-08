@@ -70,23 +70,13 @@ def build_one_word_sentiment_dict(reviews_df):
             in reviews_df[reviews_df.phrase.str.match(r'\A[\w-]+\Z')].iterrows()}
 
 
-def prediction_report(predictions_df, test_df):
-    '''
-    Function
-    --------
-    Check predicted ratings accuracy when testing on our training set
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.cross_validation import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import BernoulliNB
+import pandas as pd
 
-    Returns
-    -------
-    An accuracy percentage
-
-    '''
-    df = pd.DataFrame()
-
-    #
-    # for p in range(i):
-    #     if predictions['Sentiment'][p] == test_set['Sentiment'][p]:
-    #         hits += 1
-    #     else:
-    #
-    # return (hits/i)
+def vectorize_phrases(phrase_list):
+    v = CountVectorizer(min_df=0.00, binary=True)
+    v.fit(phrase_list)
+    return v.transform(phrase_list).tocsc()

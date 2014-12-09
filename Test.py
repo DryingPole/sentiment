@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.cross_validation import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.naive_bayes import BernoulliNB
+from sklearn.linear_model import LogisticRegression
 import pandas as pd
 
 import imp
@@ -20,18 +21,23 @@ vectorizer.fit(rarray)
 X = vectorizer.transform(rarray).tocsc()
 Y = reviews.sentiment.tolist()
 
-# xtrain, xtest, ytrain, ytest = train_test_split(X, Y)
-# ensemble = bow.Ensemble([MultinomialNB(), BernoulliNB()])
-# ensemble.fit(xtrain, ytrain)
-# Y_pred = ensemble.predict(xtest)
-XT_df = core.load_reviews('./resources/test.tsv')
-X_Test = core.vectorize_phrases(XT_df.phrase.tolist())
+xtrain, xtest, ytrain, ytest = train_test_split(X, Y)
+ensemble = bow.Ensemble([MultinomialNB(),
+                         BernoulliNB(),
+                         LogisticRegression(C=2.4, class_weight={0: 2.5,
+                                                                 1: 2,
+                                                                 2: 1,
+                                                                 3: 2,
+                                                                 4: 2})])
+ensemble.fit(xtrain, ytrain)
+Y_pred = ensemble.predict(xtest)
 
-print X_Test.shape
-print X.shape
+# XT_df = core.load_reviews('./resources/test.tsv')
+# X_Test = core.vectorize_phrases(XT_df.phrase.tolist())
 
+# print X_Test.shape
+# print X.shape
 
-#
 # ensemble = bow.Ensemble([MultinomialNB(), BernoulliNB()])
 # ensemble.fit(X, Y)
 # Y_pred = ensemble.predict(X_Test)

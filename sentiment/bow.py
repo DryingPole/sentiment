@@ -1,6 +1,7 @@
 __author__ = 'Ian Smith, Lucas Hure'
 
 import numpy as np
+import pandas as pd
 import core
 from abc import ABCMeta, abstractmethod
 
@@ -90,30 +91,49 @@ class Ensemble(core.SentModel):
         # self.res_disc_fun = self._resolve_discord
 
     def _resolve_discord(self, m1prob, m2prob, m1p, m2p):
-        # scores = np.ndarray(dtype=int,shape=len())
+        # scores = np.array(dtype=int,shape=len())
         return m1p if m1prob[m1p] + m2prob[m1p] > m1prob[m2p] + m2prob[m2p] else m2p
 
     def fit(self, X, y):
         self.fitted_models = [m.fit(X, y) for m in self.models]
 
     def predict(self, X):
-        preds = [m.predict(X) for m in self.fitted_models]
-        hy_pred = [] # A combined array of the first two models' predictions
+        fms = self.fitted_models
+        preds = [m.predict(X) for m in fms]
+        hy_pred = []  # A combined array of the first two models' predictions
 
-        m1 = self.fitted_models[0]
-        m2 = self.fitted_models[1]
-
-        discords = filter(lambda x: x is not None,
-                          map(lambda a, b, i: (a, b, i) if a != b else None,
-                              preds[0], preds[1], range(len(preds[0]))))
-
-        m1prob = m1.predict_proba(X)[:]
-        m2prob = m2.predict_proba(X)[:]
+        # m1 = self.fitted_models[0]
+        # m2 = self.fitted_models[1]
+        #
+        # discords = filter(lambda x: x is not None,
+        #                   map(lambda a, b, i: (a, b, i) if a != b else None,
+        #                       preds[0], preds[1], range(len(preds[0]))))
+        #
+        # m1prob = m1.predict_proba(X)[:]
+        # m2prob = m2.predict_proba(X)[:]
+        probas = [fm.predict_proba(X)[:] for fm in fms]
 
         # For disagreeing predictions, take the predicted category with the highes
         # associated confidence.
-        for m1p, m2p, ix in discords:
-            hy_pred[ix] = self._resolve_discord(m1prob[ix], m2prob[ix], m1p, m2p)
+
+        for ix in xrange(len(preds[0])):
+            num_models = len(preds)
+            ix_preds = [preds[i][ix] for i in xrange(num_models)]
+            ix_probas = [prob[ix][pred] for prob, pred in zip(probas, ix_preds)]
+            s = pd.Series(ix_probas, ix_preds)
+            caty_counts = s.groupby(level=0).count()
+
+            # Take majority for if two models or more agree on a category, otherwise take the
+            # most confident
+            cat = caty_counts.argmax() if caty_counts.max() > 1 else s.argmax()
+            hy_pred.append(cat)
+            # if caty_counts.max() > 1:
+            #     hy_pred.append(caty_counts.argmax())
+            # else:
+            #     pd.Series(data=[p[ix] for p in probas], ).argmax
+
+        #for m1p, m2p, ix in discords:
+         #   hy_pred[ix] = self._resolve_discord(m1prob[ix], m2prob[ix], m1p, m2p)
 
         return hy_pred
 

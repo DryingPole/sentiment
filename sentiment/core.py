@@ -3,15 +3,6 @@ __author__ = 'Ian Smith, Lucas Hure'
 import pandas as pd
 from abc import ABCMeta, abstractmethod
 
-
-# def single_word(ws):
-#     def s_match(w):
-#         return w.str.match(r'\A[\w-]+\Z')
-#     try:
-#         return s_match(ws)
-#     except AttributeError:
-#         return [s_match(w) for w in ws]
-
 neg_dict = {"not": 1,
             "neither": 1,
             "can't": 1,
@@ -19,15 +10,11 @@ neg_dict = {"not": 1,
             "aint": 1}
 
 def lreduce(fun, ls, z):
-
     def lreduce_r(fun, ls, acc):
         if len(ls) > 0:
-            # print ls
-            # print acc
             return lreduce_r(fun, ls[1:], fun(acc, ls[0]))
         else:
             return acc
-
     return lreduce_r(fun, ls, z)
 
 
@@ -51,6 +38,12 @@ class StatsRating(pd.DataFrame):
         self.accuracy = 0.
 
 
+def load_negation_dict(path='../resources/neg_words.csv'):
+    ndf = pd.read_csv(path, names=['neg_word'], index_col=0)
+    ndf['Value'] = True
+    return ndf.to_dict()['Value']
+
+
 def load_reviews(url=None):
     url = 'https://sites.google.com/site/sentananianlucas/data-and-other-material/train.tsv?attredirects=0&d=1' \
         if url is None else url
@@ -71,9 +64,6 @@ def build_one_word_sentiment_dict(reviews_df):
 
 
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.cross_validation import train_test_split
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.naive_bayes import BernoulliNB
 import pandas as pd
 
 def vectorize_phrases(phrase_list):

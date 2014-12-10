@@ -10,6 +10,16 @@ neg_dict = {"not": 1,
             "aint": 1}
 
 
+def scatter_exp_vs_pred(df):
+    """
+    A function that takes a data frame with 'expected' and
+    'predicted' columns and creates a scatter plot for those
+    columns
+    :param df:
+    :return: None.
+    """
+
+
 def lreduce(fun, ls, z):
     acc = z
     for e in ls:

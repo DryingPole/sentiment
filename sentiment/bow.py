@@ -2,6 +2,7 @@ __author__ = 'Ian Smith, Lucas Hure'
 
 import numpy as np
 import pandas as pd
+import re
 import core
 from abc import ABCMeta, abstractmethod
 
@@ -70,7 +71,7 @@ class BagOfWordsModel(core.SentModel):
         self._not_found = 0
         predictions = []
         for phrase in X:
-            words = phrase.split()
+            words = re.split("\W+", phrase)
             sent_accum = 0.0
             weight = 0
             for w in words:

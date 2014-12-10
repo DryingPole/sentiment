@@ -45,6 +45,8 @@ class MovieMapper(CategoryMapper):
 
 class BagOfWordsModel(core.SentModel):
     def __init__(self, mapper=DefaultMapper()):
+        self._scoring = 0.0
+        self._accuracy = 0.0
         self.model = None
         self.mapper = mapper
         self._not_found = 0  # a value re-initialized for each invocation of 'predict'
@@ -62,6 +64,7 @@ class BagOfWordsModel(core.SentModel):
         # sw = re.compile(r'\A[\w-]+\Z')
         # self.model = {xs: ys for xs, ys in zip(X, y) if sw.match(xs)}
         self.model = {xs: ys for xs, ys in zip(X, y)}
+        return self
 
     def predict(self, X, default_caty=2, weight_map={0: 5, 1: 3, 2: 1, 3: 3, 4: 5}):
         self._not_found = 0
@@ -82,6 +85,21 @@ class BagOfWordsModel(core.SentModel):
                 self._not_found += 1
                 predictions.append(default_caty)
         return predictions
+
+    def score(self, X, Y, **kwargs):
+
+        def tally(ddict, ex):
+            curr = ddict[ex[0]]
+            ddict[ex[0]] = (curr + 1) if ex[0] == ex[1] else curr
+            return ddict
+
+        from collections import defaultdict as ddict
+        acc = ddict(lambda: 0.0)
+        predictions = self.predict(X, **kwargs)
+        self._scoring = core.lreduce(tally, zip(Y, predictions), acc)
+        self._accuracy = core.lreduce(lambda a, e: a + e,
+                                      self._scoring.values(), 0.0) / len(Y)
+        return self._accuracy
 
 
 class Ensemble(core.SentModel):

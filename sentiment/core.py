@@ -9,13 +9,19 @@ neg_dict = {"not": 1,
             "isn't": 1,
             "aint": 1}
 
+
 def lreduce(fun, ls, z):
-    def lreduce_r(fun, ls, acc):
-        if len(ls) > 0:
-            return lreduce_r(fun, ls[1:], fun(acc, ls[0]))
-        else:
-            return acc
-    return lreduce_r(fun, ls, z)
+    acc = z
+    for e in ls:
+        acc = fun(acc, e)
+    return acc
+
+    # def lreduce_r(fun, ls, acc):
+    #     if len(ls) > 0:
+    #         return lreduce_r(fun, ls[1:], fun(acc, ls[0]))
+    #     else:
+    #         return acc
+    # return lreduce_r(fun, ls, z)
 
 
 class SentModel(object):

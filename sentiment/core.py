@@ -21,17 +21,20 @@ def scatter_exp_vs_pred(df):
 
 
 def lreduce(fun, ls, z):
+    """
+    A function following the functional paradigm. It is equivalent to
+    reduce left.
+    :param fun: A function that operates on an accumulator and
+     one element of the list and returns an accumulator. Has the
+     signature f(accumulator, element) => accumulator
+    :param ls: A list of elements
+    :param z: The base value for the accumulator
+    :return: The result of applying fun to successive elements of the list
+    """
     acc = z
     for e in ls:
         acc = fun(acc, e)
     return acc
-
-    # def lreduce_r(fun, ls, acc):
-    #     if len(ls) > 0:
-    #         return lreduce_r(fun, ls[1:], fun(acc, ls[0]))
-    #     else:
-    #         return acc
-    # return lreduce_r(fun, ls, z)
 
 
 class SentModel(object):

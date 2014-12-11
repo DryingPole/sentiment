@@ -2,6 +2,7 @@ __author__ = 'Ian Smith, Lucas Hure'
 
 import pandas as pd
 from abc import ABCMeta, abstractmethod
+import matplotlib.pyplot as plt
 
 neg_dict = {"not": 1,
             "neither": 1,
@@ -10,7 +11,7 @@ neg_dict = {"not": 1,
             "aint": 1}
 
 
-def scatter_exp_vs_pred(df):
+def scatter_exp_vs_pred(df=None, expected=None, predicted=None):
     """
     A function that takes a data frame with 'expected' and
     'predicted' columns and creates a scatter plot for those
@@ -18,7 +19,21 @@ def scatter_exp_vs_pred(df):
     :param df:
     :return: None.
     """
+    if df is None:
+        df = pd.DataFrame()
+        df['expected'] = expected
+        df['predicted'] = predicted
 
+    # res_df = pd.DataFrame(data=np.transpose([pred, XY_all[3]]), columns=["predicted", "expected"])
+    rstats = df.groupby(["predicted", "expected"]).size().\
+        reset_index().rename(columns={0: "counts"})
+
+    plt.figure(figsize=(12, 8))
+    plt.title("Predicted vs. Expected Sentiment Values")
+    plt.ylabel("Predicted Sentiment")
+    plt.xlabel("Expected Sentiment")
+    plt.scatter(rstats.expected, rstats.predicted, s=[0.1*c for c in rstats.counts], alpha=0.6)
+    plt.show()
 
 def lreduce(fun, ls, z):
     """

@@ -120,16 +120,7 @@ class Ensemble(core.SentModel):
         fms = self.fitted_models
         preds = [m.predict(X) for m in fms]
         hy_pred = []  # A combined array of the first two models' predictions
-        self._
-        # m1 = self.fitted_models[0]
-        # m2 = self.fitted_models[1]
-        #
-        # discords = filter(lambda x: x is not None,
-        #                   map(lambda a, b, i: (a, b, i) if a != b else None,
-        #                       preds[0], preds[1], range(len(preds[0]))))
-        #
-        # m1prob = m1.predict_proba(X)[:]
-        # m2prob = m2.predict_proba(X)[:]
+
         probas = [fm.predict_proba(X)[:] for fm in fms]
 
         # For disagreeing predictions, take the predicted category with the highes
